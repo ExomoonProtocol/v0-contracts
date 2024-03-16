@@ -97,3 +97,43 @@ jobs:
 
     - name: Test
       run: yarn test
+
+  docs:
+    name: Documentation
+    needs: [build, lint, test]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Use Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'
+
+    - name: Cache Node.js modules
+      uses: actions/cache@v2
+      with:
+        path: ./node_modules
+        key: ${{ runner.OS }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.OS }}-yarn-
+
+    - name: Install Dependencies
+      run: yarn install
+
+    - name: Generate Documentation
+      run: |
+        yarn run docs
+        if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+          mv docs main
+        else
+          mv docs dev
+        fi
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./
