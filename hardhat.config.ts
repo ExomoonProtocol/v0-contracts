@@ -1,7 +1,8 @@
-import "@typechain/hardhat";
-import "@nomicfoundation/hardhat-ethers";
-import "@nomicfoundation/hardhat-verify";
-import "solidity-docgen";
+import "@typechain/hardhat"
+import "@nomicfoundation/hardhat-ethers"
+import "@nomicfoundation/hardhat-verify"
+import "solidity-docgen"
+import "hardhat-tracer"
 
 export default {
   networks: {
@@ -31,4 +32,4 @@ export default {
       },
     },
   },
-};
+}
