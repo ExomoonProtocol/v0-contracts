@@ -1,0 +1,103 @@
+name: CI Pipeline
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Use Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'
+
+    - name: Cache Node.js modules
+      uses: actions/cache@v2
+      with:
+        path: ~/.yarn
+        key: ${{ runner.OS }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.OS }}-yarn-
+
+    - name: Install Dependencies
+      run: yarn install
+
+    - name: Compile
+      run: yarn compile
+
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: compiled-artifacts
+        if-no-files-found: error
+        path: |
+          artifacts/
+          typechain-types/
+
+  lint:
+    name: Lint
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Use Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'
+
+    - name: Cache Node.js modules
+      uses: actions/cache@v2
+      with:
+        path: ~/.yarn
+        key: ${{ runner.OS }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.OS }}-yarn-
+
+    - name: Install Dependencies
+      run: yarn install
+
+    - name: Download compiled artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: compiled-artifacts
+
+    - name: Lint
+      run: yarn lint
+
+  test:
+    name: Test
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Use Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'
+
+    - name: Cache Node.js modules
+      uses: actions/cache@v2
+      with:
+        path: ~/.yarn
+        key: ${{ runner.OS }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.OS }}-yarn-
+
+    - name: Install Dependencies
+      run: yarn install
+
+    - name: Download compiled artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: compiled-artifacts
+
+    - name: Test
+      run: yarn test
