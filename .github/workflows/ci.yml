@@ -1,6 +1,6 @@
 name: CI Pipeline
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   build:
@@ -18,7 +18,7 @@ jobs:
     - name: Cache Node.js modules
       uses: actions/cache@v2
       with:
-        path: ~/.yarn
+        path: ./node_modules
         key: ${{ runner.OS }}-yarn-${{ hashFiles('**/yarn.lock') }}
         restore-keys: |
           ${{ runner.OS }}-yarn-
