@@ -16,4 +16,8 @@ contract ContractA {
     function setValue(uint256 _value) public {
         value = _value;
     }
+
+    function helloWorldFunction() public pure returns (string memory) {
+        return "Hello, World!";
+    }
 }
