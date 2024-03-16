@@ -24,6 +24,7 @@ jobs:
           ${{ runner.OS }}-yarn-
 
     - name: Install Dependencies
+      if: ${{ steps.cache.outputs.cache-hit != 'true' }}
       run: yarn install
 
     - name: Compile
