@@ -102,6 +102,7 @@ jobs:
     name: Documentation
     needs: [build, lint, test]
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
+    permissions: write-all
     runs-on: ubuntu-latest
 
     steps:
