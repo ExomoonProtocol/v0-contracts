@@ -127,9 +127,14 @@ jobs:
     - name: Generate Documentation
       run: |
         yarn run docs
+    
+    - name: Extract branch name
+      shell: bash
+      run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+      id: extract_branch
 
     - name: Archive Documentation
       uses: actions/upload-artifact@v4
       with:
-        name: exomoon-v0-contracts-documentation-${{ github.ref }}
+        name: exomoon-v0-contracts-documentation-${{ steps.extract_branch.outputs.branch }}
         path: ./docs
