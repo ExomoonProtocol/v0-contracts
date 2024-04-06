@@ -8,36 +8,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Use Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
 
-    - name: Cache Node.js modules
-      uses: actions/cache@v4
-      with:
-        path: ./node_modules
-        key: ${{ runner.OS }}-yarn-${{ hashFiles('**/yarn.lock') }}
-        restore-keys: |
-          ${{ runner.OS }}-yarn-
+      - name: Cache Node.js modules
+        uses: actions/cache@v4
+        with:
+          path: ./node_modules
+          key: ${{ runner.OS }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.OS }}-yarn-
 
-    - name: Install Dependencies
-      if: ${{ steps.cache.outputs.cache-hit != 'true' }}
-      run: yarn install
+      - name: Install Dependencies
+        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+        run: yarn install
 
-    - name: Compile
-      run: yarn compile
+      - name: Compile
+        run: yarn compile
 
-    - name: Archive production artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: compiled-artifacts
-        if-no-files-found: error
-        path: |
-          artifacts/
-          typechain-types/
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiled-artifacts
+          if-no-files-found: error
+          path: |
+            artifacts/
+            typechain-types/
 
   lint:
     name: Lint
@@ -45,28 +45,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Use Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
 
-    - name: Cache Node.js modules
-      uses: actions/cache@v4
-      with:
-        path: ./node_modules
-        key: ${{ runner.OS }}-yarn-${{ hashFiles('**/yarn.lock') }}
-        restore-keys: |
-          ${{ runner.OS }}-yarn-
+      - name: Cache Node.js modules
+        uses: actions/cache@v4
+        with:
+          path: ./node_modules
+          key: ${{ runner.OS }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.OS }}-yarn-
 
-    - name: Download compiled artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: compiled-artifacts
+      - name: Download compiled artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: compiled-artifacts
 
-    - name: Lint
-      run: yarn lint
+      - name: Lint
+        run: yarn lint
 
   test:
     name: Test
@@ -74,67 +74,72 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Use Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
 
-    - name: Cache Node.js modules
-      uses: actions/cache@v4
-      with:
-        path: ./node_modules
-        key: ${{ runner.OS }}-yarn-${{ hashFiles('**/yarn.lock') }}
-        restore-keys: |
-          ${{ runner.OS }}-yarn-
+      - name: Cache Node.js modules
+        uses: actions/cache@v4
+        with:
+          path: ./node_modules
+          key: ${{ runner.OS }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.OS }}-yarn-
 
+      - name: Download compiled artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: compiled-artifacts
 
-    - name: Download compiled artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: compiled-artifacts
+      - name: Test
+        run: yarn test-gas
+        env:
+          COINMARKETCAP_API_KEY: ${{ secrets.COINMARKETCAP_API_KEY }}
+          ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
 
-    - name: Test
-      run: yarn test
+      - name: coverage
+        run: yarn coverage
 
   docs:
     name: Documentation
     needs: [build, lint, test]
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
+    #if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
     permissions: write-all
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Use Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
 
-    - name: Cache Node.js modules
-      uses: actions/cache@v4
-      with:
-        path: ./node_modules
-        key: ${{ runner.OS }}-yarn-${{ hashFiles('**/yarn.lock') }}
-        restore-keys: |
-          ${{ runner.OS }}-yarn-
+      - name: Cache Node.js modules
+        uses: actions/cache@v4
+        with:
+          path: ./node_modules
+          key: ${{ runner.OS }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.OS }}-yarn-
 
-    - name: Install Dependencies
-      run: yarn install
+      - name: Install Dependencies
+        run: yarn install
 
-    - name: Generate Documentation
-      run: |
-        yarn run docs
-    
-    - name: Extract branch name
-      shell: bash
-      run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-      id: extract_branch
+      - name: Generate Documentation
+        run: |
+          yarn run docs
 
-    - name: Archive Documentation
-      uses: actions/upload-artifact@v4
-      with:
-        name: exomoon-v0-contracts-documentation-${{ steps.extract_branch.outputs.branch }}
-        path: ./docs
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        id: extract_branch
+
+      - name: Archive Documentation
+        uses: actions/upload-artifact@v4
+        with:
+          name: exomoon-v0-contracts-documentation-${{ steps.extract_branch.outputs.branch }}
+          path: ./docs
