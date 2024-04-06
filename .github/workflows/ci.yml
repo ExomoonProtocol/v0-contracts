@@ -95,7 +95,13 @@ jobs:
           name: compiled-artifacts
 
       - name: Test
-        run: yarn test
+        run: yarn test-gas
+        env:
+          COINMARKETCAP_API_KEY: ${{ secrets.COINMARKETCAP_API_KEY }}
+          ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
+
+      - name: coverage
+        run: yarn coverage
 
   docs:
     name: Documentation
