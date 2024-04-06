@@ -1,8 +1,11 @@
 {
-  "name": "v0-contracts",
+  "name": "@exomoon/v0-contracts",
   "version": "1.0.0",
   "repository": "https://github.com/ExomoonProtocol/v0-contracts.git",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "compile": "hardhat compile",
     "test-gas": "cross-env REPORT_GAS=true hardhat test",
@@ -13,6 +16,10 @@
     "docs": "hardhat docgen",
     "lint": "solhint -f table contracts/**/*.sol"
   },
+  "files": [
+    "contracts",
+    "artifacts/contracts"
+  ],
   "dependencies": {},
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.6",
