@@ -5,3 +5,7 @@ typechain-types
 .DS_Store
 *.log
 docs
+coverage
+coverage.json
+gasReport.md
+.env
