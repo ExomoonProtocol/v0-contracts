@@ -80,80 +80,138 @@ describe("ExomoonERC721", () => {
       exomoonErc721 = await loadFixture(launchDeploymentFixture)
     })
 
-    it("Should mint a single item", async () => {
-      await exomoonErc721.mint(1, "0x", { value: ethers.parseEther("0.1") })
-      expect(await exomoonErc721.balanceOf(accounts[0].address)).to.be.equal(1n)
+    describe("mint", () => {
+      it("Should mint a single item", async () => {
+        await exomoonErc721.mint(1, "0x", { value: ethers.parseEther("0.1") })
+        expect(await exomoonErc721.balanceOf(accounts[0].address)).to.be.equal(1n)
+      })
+
+      it("Should mint multiple items", async () => {
+        await exomoonErc721.setPrice(ethers.parseEther("0.1"))
+        await exomoonErc721.mint(10, "0x", { value: ethers.parseEther("1") })
+
+        expect(await exomoonErc721.balanceOf(accounts[0].address)).to.be.equal(10n)
+      })
+
+      it("Should not mint if not enough funds", async () => {
+        await expect(exomoonErc721.mint(1, "0x")).to.be.revertedWithCustomError(exomoonErc721, "InsufficientFunds")
+
+        await expect(exomoonErc721.mint(1, "0x", { value: ethers.parseEther("0.099") })).to.be.revertedWithCustomError(
+          exomoonErc721,
+          "InsufficientFunds",
+        )
+      })
+
+      it("Should not mint if paused", async () => {
+        await exomoonErc721.setPaused(true)
+        await expect(exomoonErc721.mint(1, "0x", { value: ethers.parseEther("0.1") })).to.be.revertedWithCustomError(
+          exomoonErc721,
+          "Paused",
+        )
+      })
+
+      it("Should mint and set token data", async () => {
+        // Zero bytes
+        await exomoonErc721.mint(1, "0x", { value: ethers.parseEther("0.1") })
+        expect(await exomoonErc721.getTokenData(1)).to.be.equal("0x")
+
+        // Non-zero bytes
+        await exomoonErc721.mint(1, "0x0d5f001a", { value: ethers.parseEther("0.1") })
+        expect(await exomoonErc721.getTokenData(2)).to.be.equal("0x0d5f001a")
+      })
     })
 
-    it("Should mint multiple items", async () => {
-      await exomoonErc721.setPrice(ethers.parseEther("0.1"))
-      await exomoonErc721.mint(10, "0x", { value: ethers.parseEther("1") })
+    describe("paused / setPaused", () => {
+      it("Should set new paused state", async () => {
+        await exomoonErc721.setPaused(true)
+        expect(await exomoonErc721.paused()).to.be.equal(true)
+      })
 
-      expect(await exomoonErc721.balanceOf(accounts[0].address)).to.be.equal(10n)
+      it("Should not allow to set paused if not owner", async () => {
+        await expect(exomoonErc721.connect(accounts[1]).setPaused(true)).to.be.revertedWithCustomError(
+          exomoonErc721,
+          "OwnableUnauthorizedAccount",
+        )
+      })
     })
 
-    it("Should not mint if not enough funds", async () => {
-      await expect(exomoonErc721.mint(1, "0x")).to.be.revertedWithCustomError(exomoonErc721, "InsufficientFunds")
+    describe("price / setPrice", () => {
+      it("Should set new price", async () => {
+        await exomoonErc721.setPrice(ethers.parseEther("0.2"))
+        expect(await exomoonErc721.price()).to.be.equal(ethers.parseEther("0.2"))
+      })
 
-      await expect(exomoonErc721.mint(1, "0x", { value: ethers.parseEther("0.099") })).to.be.revertedWithCustomError(
-        exomoonErc721,
-        "InsufficientFunds",
-      )
+      it("Should not allow to set price if not owner", async () => {
+        await expect(
+          exomoonErc721.connect(accounts[1]).setPrice(ethers.parseEther("0.1")),
+        ).to.be.revertedWithCustomError(exomoonErc721, "OwnableUnauthorizedAccount")
+      })
     })
 
-    it("Should not mint if paused", async () => {
-      await exomoonErc721.setPaused(true)
-      await expect(exomoonErc721.mint(1, "0x", { value: ethers.parseEther("0.1") })).to.be.revertedWithCustomError(
-        exomoonErc721,
-        "Paused",
-      )
+    describe("withdraw", () => {
+      it("Should withdraw funds", async () => {
+        await exomoonErc721.mint(1, "0x", { value: ethers.parseEther("0.1") })
+        await exomoonErc721.withdraw()
+        expect(await ethers.provider.getBalance(await exomoonErc721.getAddress())).to.be.equal(0)
+      })
+
+      it("Should not allow to withdraw if not owner", async () => {
+        await expect(exomoonErc721.connect(accounts[1]).withdraw()).to.be.revertedWithCustomError(
+          exomoonErc721,
+          "OwnableUnauthorizedAccount",
+        )
+      })
     })
 
-    it("Should mint and set token data", async () => {
-      // Zero bytes
-      await exomoonErc721.mint(1, "0x", { value: ethers.parseEther("0.1") })
-      expect(await exomoonErc721.getTokenData(1)).to.be.equal("0x")
+    describe("tokenURI", () => {
+      it("Should return default revealed token URI", async () => {
+        await exomoonErc721.mint(1, "0x", { value: ethers.parseEther("0.1") })
+        expect(await exomoonErc721.tokenURI(1)).to.be.equal("1.json")
+      })
 
-      // Non-zero bytes
-      await exomoonErc721.mint(1, "0x0d5f001a", { value: ethers.parseEther("0.1") })
-      expect(await exomoonErc721.getTokenData(2)).to.be.equal("0x0d5f001a")
-    })
+      it("Should return revealed token URI with custom prefix and suffix", async () => {
+        await exomoonErc721.setBaseUri("https://example.com/")
+        await exomoonErc721.setUriSuffix(".json")
 
-    it("Should set new paused state", async () => {
-      await exomoonErc721.setPaused(true)
-      expect(await exomoonErc721.paused()).to.be.equal(true)
-    })
+        await exomoonErc721.mint(1, "0x", { value: ethers.parseEther("0.1") })
+        expect(await exomoonErc721.tokenURI(1)).to.be.equal("https://example.com/1.json")
 
-    it("Should not allow to set paused if not owner", async () => {
-      await expect(exomoonErc721.connect(accounts[1]).setPaused(true)).to.be.revertedWithCustomError(
-        exomoonErc721,
-        "OwnableUnauthorizedAccount",
-      )
-    })
+        await exomoonErc721.setBaseUri("https://api.example.com/")
+        await exomoonErc721.setUriSuffix("")
 
-    it("Should set new price", async () => {
-      await exomoonErc721.setPrice(ethers.parseEther("0.2"))
-      expect(await exomoonErc721.price()).to.be.equal(ethers.parseEther("0.2"))
-    })
+        expect(await exomoonErc721.tokenURI(1)).to.be.equal("https://api.example.com/1")
+      })
 
-    it("Should not allow to set price if not owner", async () => {
-      await expect(exomoonErc721.connect(accounts[1]).setPrice(ethers.parseEther("0.1"))).to.be.revertedWithCustomError(
-        exomoonErc721,
-        "OwnableUnauthorizedAccount",
-      )
-    })
+      it("Should read base URI", async () => {
+        expect(await exomoonErc721.baseUri()).to.be.equal("")
+        await exomoonErc721.setBaseUri("https://example.com/")
+        expect(await exomoonErc721.baseUri()).to.be.equal("https://example.com/")
+      })
 
-    it("Should withdraw funds", async () => {
-      await exomoonErc721.mint(1, "0x", { value: ethers.parseEther("0.1") })
-      await exomoonErc721.withdraw()
-      expect(await ethers.provider.getBalance(await exomoonErc721.getAddress())).to.be.equal(0)
-    })
+      it("Should read URI suffix", async () => {
+        expect(await exomoonErc721.uriSuffix()).to.be.equal(".json")
+        await exomoonErc721.setUriSuffix("")
+        expect(await exomoonErc721.uriSuffix()).to.be.equal("")
+        await exomoonErc721.setUriSuffix(".custom-extension")
+        expect(await exomoonErc721.uriSuffix()).to.be.equal(".custom-extension")
+      })
 
-    it("Should not allow to withdraw if not owner", async () => {
-      await expect(exomoonErc721.connect(accounts[1]).withdraw()).to.be.revertedWithCustomError(
-        exomoonErc721,
-        "OwnableUnauthorizedAccount",
-      )
+      it("Should revert if trying to read token URI of non-existing token", async () => {
+        expect(exomoonErc721.tokenURI(1)).to.be.reverted
+      })
+
+      it("Should revert if a non-owner tries to set base URI", async () => {
+        await expect(
+          exomoonErc721.connect(accounts[1]).setBaseUri("https://example.com/"),
+        ).to.be.revertedWithCustomError(exomoonErc721, "OwnableUnauthorizedAccount")
+      })
+
+      it("Should revert if a non-owner tries to set URI suffix", async () => {
+        await expect(exomoonErc721.connect(accounts[1]).setUriSuffix("")).to.be.revertedWithCustomError(
+          exomoonErc721,
+          "OwnableUnauthorizedAccount",
+        )
+      })
     })
   })
 })
