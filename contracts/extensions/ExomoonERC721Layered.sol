@@ -151,6 +151,7 @@ contract ExomoonERC721Layered is ExomoonERC721, IExomoonERC721Layered {
         }
 
         uint256 nextToken = _nextTokenId();
+        uint256 totalPrice = (this.price() * _amount);
 
         for (uint256 i = 0; i < _amount; i++) {
             bytes memory tokenData = new bytes(layersCount);
@@ -169,9 +170,24 @@ contract ExomoonERC721Layered is ExomoonERC721, IExomoonERC721Layered {
                     revert InvalidVariationIndex();
                 }
 
+                if (variationIndex != 31) {
+                    totalPrice += _layers[j].price;
+
+                    // Adds the price of the variation to the total price
+                    totalPrice += _layers[j].priceOverrides[variationIndex];
+                }
+
+                // Adds the price of the variation to the total price
+                // variationsPrice += _layers[j].priceOverrides[variationIndex];
+
                 tokenData[j] = bytes1((variationIndex << 3) | colorIndex);
             }
             _setTokenData(nextToken + i, tokenData);
+        }
+
+        // Checks if the total price is enough
+        if (msg.value < totalPrice) {
+            revert InsufficientFunds();
         }
     }
 }

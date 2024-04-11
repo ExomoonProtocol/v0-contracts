@@ -380,6 +380,129 @@ describe("ExomoonERC721Layered", () => {
         await exomoonErc721Layered.mint(1, data, { value: ethers.parseEther("0.5") })
       })
 
+      it("Should mint with base, and traits price", async () => {
+        await exomoonErc721Layered.setPrice(ethers.parseEther("0.6"))
+        await exomoonErc721Layered.addLayer("Background", ethers.parseEther("0.2"), 4, false)
+        await exomoonErc721Layered.addLayer("Character", ethers.parseEther("0.3"), 4, false)
+        await exomoonErc721Layered.setVariations(0, 8)
+        await exomoonErc721Layered.setVariations(1, 8)
+
+        const data = await exomoonErc721Layered.encodeLayersInfo([
+          {
+            layerIndex: 0,
+            variation: 1,
+            color: 0,
+          },
+          {
+            layerIndex: 1,
+            variation: 2,
+            color: 0,
+          },
+        ])
+
+        await exomoonErc721Layered.mint(1, data, { value: ethers.parseEther("1.1") })
+      })
+
+      it("Should mint with base, traits and variation price", async () => {
+        await exomoonErc721Layered.setPrice(ethers.parseEther("0.6"))
+        await exomoonErc721Layered.addLayer("Background", ethers.parseEther("0.2"), 4, false)
+        await exomoonErc721Layered.addLayer("Character", ethers.parseEther("0.3"), 4, false)
+        await exomoonErc721Layered.setVariations(0, 8)
+        await exomoonErc721Layered.setVariations(1, 8)
+        await exomoonErc721Layered.setLayerVariationPrice(1, 2, ethers.parseEther("0.4"))
+
+        const data = await exomoonErc721Layered.encodeLayersInfo([
+          {
+            layerIndex: 0,
+            variation: 1,
+            color: 0,
+          },
+          {
+            layerIndex: 1,
+            variation: 2,
+            color: 0,
+          },
+        ])
+
+        await exomoonErc721Layered.mint(1, data, { value: ethers.parseEther("1.5") })
+      })
+
+      it("Should revert if incorrect price - base", async () => {
+        await exomoonErc721Layered.setPrice(ethers.parseEther("0.6"))
+        await exomoonErc721Layered.addLayer("Background", ethers.parseEther("0"), 4, false)
+        await exomoonErc721Layered.addLayer("Character", ethers.parseEther("0"), 4, false)
+        await exomoonErc721Layered.setVariations(0, 8)
+        await exomoonErc721Layered.setVariations(1, 8)
+
+        const data = await exomoonErc721Layered.encodeLayersInfo([
+          {
+            layerIndex: 0,
+            variation: 1,
+            color: 0,
+          },
+          {
+            layerIndex: 1,
+            variation: 2,
+            color: 0,
+          },
+        ])
+
+        await expect(
+          exomoonErc721Layered.mint(1, data, { value: ethers.parseEther("0.599") }),
+        ).to.be.revertedWithCustomError(exomoonErc721Layered, "InsufficientFunds")
+      })
+
+      it("Should revert if incorrect price - traits", async () => {
+        await exomoonErc721Layered.setPrice(ethers.parseEther("0.6"))
+        await exomoonErc721Layered.addLayer("Background", ethers.parseEther("0.2"), 4, false)
+        await exomoonErc721Layered.addLayer("Character", ethers.parseEther("0.3"), 4, false)
+        await exomoonErc721Layered.setVariations(0, 8)
+        await exomoonErc721Layered.setVariations(1, 8)
+
+        const data = await exomoonErc721Layered.encodeLayersInfo([
+          {
+            layerIndex: 0,
+            variation: 1,
+            color: 0,
+          },
+          {
+            layerIndex: 1,
+            variation: 2,
+            color: 0,
+          },
+        ])
+
+        await expect(
+          exomoonErc721Layered.mint(1, data, { value: ethers.parseEther("1.0999") }),
+        ).to.be.revertedWithCustomError(exomoonErc721Layered, "InsufficientFunds")
+      })
+
+      it("Should revert if incorrect price - variation", async () => {
+        await exomoonErc721Layered.setPrice(ethers.parseEther("0.6"))
+        await exomoonErc721Layered.addLayer("Background", ethers.parseEther("0.2"), 4, false)
+        await exomoonErc721Layered.addLayer("Character", ethers.parseEther("0.3"), 4, false)
+        await exomoonErc721Layered.setVariations(0, 8)
+        await exomoonErc721Layered.setVariations(1, 8)
+        await exomoonErc721Layered.setLayerVariationPrice(1, 2, ethers.parseEther("0.4"))
+
+        const data = await exomoonErc721Layered.encodeLayersInfo([
+          {
+            layerIndex: 0,
+            variation: 1,
+            color: 0,
+          },
+          {
+            layerIndex: 1,
+            variation: 2,
+            color: 0,
+          },
+        ])
+
+        await expect(
+          exomoonErc721Layered.mint(1, data, { value: ethers.parseEther("1.499") }),
+        ).to.be.revertedWithCustomError(exomoonErc721Layered, "InsufficientFunds")
+      })
+
       it("Should revert if incorrect number of layers", async () => {
         await exomoonErc721Layered.addLayer("Background", ethers.parseEther("0.2"), 4, false)
         await exomoonErc721Layered.addLayer("Character", ethers.parseEther("0.3"), 4, false)
