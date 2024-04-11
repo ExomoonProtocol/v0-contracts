@@ -97,6 +97,19 @@ interface IExomoonERC721Layered is IExomoonERC721 {
     function getVariationPrice(uint256 _index, uint8 _variation) external view returns (uint256);
 
     /**
+     * @dev This function returns the prices of the layers.
+     * @return uint256[] The prices of the layers.
+     */
+    function getLayerPrices() external view returns (uint256[] memory);
+
+    /**
+     * @dev This function returns the prices of the variations of the layer at the specified index.
+     * @param _index The index of the layer.
+     * @return uint256[] The prices of the variations of the layer.
+     */
+    function getVariationPrices(uint256 _index) external view returns (uint256[] memory);
+
+    /**
      * @dev This function returns the layer at the specified index.
      * @param _index The index of the layer.
      */

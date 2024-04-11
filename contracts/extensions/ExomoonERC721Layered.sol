@@ -91,6 +91,30 @@ contract ExomoonERC721Layered is ExomoonERC721, IExomoonERC721Layered {
     /**
      * @inheritdoc IExomoonERC721Layered
      */
+    function getLayerPrices() external view override returns (uint256[] memory) {
+        uint256 layersCount = _layers.length;
+        uint256[] memory prices = new uint256[](layersCount);
+        for (uint256 i = 0; i < layersCount; i++) {
+            prices[i] = _layers[i].price;
+        }
+        return prices;
+    }
+
+    /**
+     * @inheritdoc IExomoonERC721Layered
+     */
+    function getVariationPrices(uint256 _index) external view override isLayerValid(_index) returns (uint256[] memory) {
+        uint8 variationsCount = _layers[_index].variations;
+        uint256[] memory prices = new uint256[](variationsCount);
+        for (uint8 i = 0; i < variationsCount; i++) {
+            prices[i] = _layers[_index].priceOverrides[i];
+        }
+        return prices;
+    }
+
+    /**
+     * @inheritdoc IExomoonERC721Layered
+     */
     function setVariations(uint256 _index, uint8 _variations) external override isLayerValid(_index) onlyOwner {
         if (_variations >= 32) {
             revert TooManyVariations();
@@ -173,15 +197,12 @@ contract ExomoonERC721Layered is ExomoonERC721, IExomoonERC721Layered {
                 }
 
                 if (variationIndex != 31) {
+                    // Adds the base price of the layer to the total price
                     totalPrice += _layers[j].price;
 
                     // Adds the price of the variation to the total price
                     totalPrice += _layers[j].priceOverrides[variationIndex];
                 }
-
-                // Adds the price of the variation to the total price
-                // variationsPrice += _layers[j].priceOverrides[variationIndex];
-
                 tokenData[j] = bytes1((variationIndex << 3) | colorIndex);
             }
             _setTokenData(nextToken + i, tokenData);

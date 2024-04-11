@@ -110,6 +110,58 @@ describe("ExomoonERC721Layered", () => {
       })
     })
 
+    describe("getLayerPrices", () => {
+      it("Should get layer prices - empty", async () => {
+        expect(await exomoonErc721Layered.getLayerPrices()).to.be.deep.equal([])
+      })
+
+      it("Should get layer prices - single price", async () => {
+        await exomoonErc721Layered.addLayer("Background", ethers.parseEther("0.2"), 4, false)
+        expect(await exomoonErc721Layered.getLayerPrices()).to.be.deep.equal([ethers.parseEther("0.2")])
+      })
+
+      it("Should get layer prices - multiple prices", async () => {
+        await exomoonErc721Layered.addLayer("Background", ethers.parseEther("0.2"), 4, false)
+        await exomoonErc721Layered.addLayer("Character", ethers.parseEther("0.3"), 4, false)
+        expect(await exomoonErc721Layered.getLayerPrices()).to.be.deep.equal([
+          ethers.parseEther("0.2"),
+          ethers.parseEther("0.3"),
+        ])
+      })
+    })
+
+    describe("getVariationPrices", () => {
+      it("Should get variation prices", async () => {
+        await exomoonErc721Layered.addLayer("Background", ethers.parseEther("0.2"), 4, false)
+
+        // Sets the variation prices
+        await exomoonErc721Layered.setLayerVariationPrice(0, 0, ethers.parseEther("0.3"))
+        await exomoonErc721Layered.setLayerVariationPrice(0, 1, ethers.parseEther("0.4"))
+
+        expect(await exomoonErc721Layered.getVariationPrices(0)).to.be.deep.equal([
+          ethers.parseEther("0.3"),
+          ethers.parseEther("0.4"),
+          ethers.parseEther("0"),
+          ethers.parseEther("0"),
+        ])
+      })
+
+      it("Should get variation prices - all variations with default prices", async () => {
+        await exomoonErc721Layered.addLayer("Background", ethers.parseEther("0.2"), 31, false)
+
+        const expectedPrices = Array(31).fill(ethers.parseEther("0"))
+
+        expect(await exomoonErc721Layered.getVariationPrices(0)).to.be.deep.equal(expectedPrices)
+      })
+
+      it("Should revert if passing a non existing layer index", async () => {
+        await expect(exomoonErc721Layered.getVariationPrices(0)).to.be.revertedWithCustomError(
+          exomoonErc721Layered,
+          "InvalidLayerIndex",
+        )
+      })
+    })
+
     describe("setLayerVariations", () => {
       it("Should set variations", async () => {
         await exomoonErc721Layered.addLayer("Background", ethers.parseEther("0.2"), 4, false)
