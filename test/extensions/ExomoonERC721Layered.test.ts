@@ -597,5 +597,55 @@ describe("ExomoonERC721Layered", () => {
         ).to.be.revertedWithCustomError(exomoonErc721Layered, "RequiredLayerMissing")
       })
     })
+
+    describe("Token URI", () => {
+      it("Should return default revealed token URI", async () => {
+        await exomoonErc721Layered.addLayer("Background", ethers.parseEther("0.2"), 4, false)
+        await exomoonErc721Layered.addLayer("Character", ethers.parseEther("0.3"), 4, false)
+        await exomoonErc721Layered.setVariations(0, 8)
+        await exomoonErc721Layered.setVariations(1, 8)
+
+        const data = await exomoonErc721Layered.encodeLayersInfo([
+          {
+            layerIndex: 0,
+            variation: 1,
+            color: 0,
+          },
+          {
+            layerIndex: 1,
+            variation: 2,
+            color: 0,
+          },
+        ])
+
+        await exomoonErc721Layered.mint(1, data, { value: ethers.parseEther("0.5") })
+        expect(await exomoonErc721Layered.tokenURI(1)).to.be.equal("0x0810/1.json")
+      })
+
+      it("Should return revealed token URI with custom prefix and suffix", async () => {
+        await exomoonErc721Layered.addLayer("Background", ethers.parseEther("0.2"), 4, false)
+        await exomoonErc721Layered.addLayer("Character", ethers.parseEther("0.3"), 4, false)
+        await exomoonErc721Layered.setVariations(0, 8)
+        await exomoonErc721Layered.setVariations(1, 8)
+
+        const data = await exomoonErc721Layered.encodeLayersInfo([
+          {
+            layerIndex: 0,
+            variation: 1,
+            color: 0,
+          },
+          {
+            layerIndex: 1,
+            variation: 2,
+            color: 0,
+          },
+        ])
+
+        await exomoonErc721Layered.mint(1, data, { value: ethers.parseEther("0.5") })
+        await exomoonErc721Layered.setBaseUri("https://example.com/")
+        await exomoonErc721Layered.setUriSuffix(".json")
+        expect(await exomoonErc721Layered.tokenURI(1)).to.be.equal("https://example.com/0x0810/1.json")
+      })
+    })
   })
 })

@@ -3,6 +3,8 @@ pragma solidity ^0.8.24;
 
 import {IExomoonERC721Layered} from "./IExomoonERC721Layered.sol";
 import {ExomoonERC721} from "../ExomoonERC721.sol";
+import {IERC721A} from "erc721a/contracts/IERC721A.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 /**
  * @title ExomoonERC721Layered Contract
@@ -22,7 +24,9 @@ contract ExomoonERC721Layered is ExomoonERC721, IExomoonERC721Layered {
         string memory _name,
         string memory _symbol,
         uint256 _maxSupplyVal
-    ) ExomoonERC721(_name, _symbol, _maxSupplyVal) {}
+    ) ExomoonERC721(_name, _symbol, _maxSupplyVal) {
+        _tokenUriMode = TokenUriMode.MintData;
+    }
 
     modifier isLayerValid(uint256 _index) {
         if (_index >= _layers.length) {

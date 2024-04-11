@@ -135,6 +135,41 @@ describe("ExomoonERC721", () => {
       })
     })
 
+    describe("token URI mode - set / get", () => {
+      it("Should set new token URI mode", async () => {
+        await exomoonErc721.setTokenUriMode(1)
+        expect(await exomoonErc721.tokenUriMode()).to.be.equal(1)
+      })
+
+      it("Should not allow to set token URI mode if not owner", async () => {
+        await expect(exomoonErc721.connect(accounts[1]).setTokenUriMode(1)).to.be.revertedWithCustomError(
+          exomoonErc721,
+          "OwnableUnauthorizedAccount",
+        )
+      })
+
+      it("Should get default token URI mode", async () => {
+        expect(await exomoonErc721.tokenUriMode()).to.be.equal(1)
+      })
+
+      it("Should revert if trying to set invalid token URI mode", async () => {
+        await expect(exomoonErc721.setTokenUriMode(4)).to.be.reverted
+      })
+    })
+
+    describe("prerevealUri / setPrerevealUri", () => {
+      it("Should set new prereveal URI", async () => {
+        await exomoonErc721.setPrerevealUri("https://example.com/")
+        expect(await exomoonErc721.prerevealUri()).to.be.equal("https://example.com/")
+      })
+
+      it("Should not allow to set prereveal URI if not owner", async () => {
+        await expect(
+          exomoonErc721.connect(accounts[1]).setPrerevealUri("https://example.com/"),
+        ).to.be.revertedWithCustomError(exomoonErc721, "OwnableUnauthorizedAccount")
+      })
+    })
+
     describe("price / setPrice", () => {
       it("Should set new price", async () => {
         await exomoonErc721.setPrice(ethers.parseEther("0.2"))
@@ -164,53 +199,83 @@ describe("ExomoonERC721", () => {
     })
 
     describe("tokenURI", () => {
-      it("Should return default revealed token URI", async () => {
-        await exomoonErc721.mint(1, "0x", { value: ethers.parseEther("0.1") })
-        expect(await exomoonErc721.tokenURI(1)).to.be.equal("1.json")
+      describe("Prereveal mode (0)", () => {
+        beforeEach(async () => {
+          await exomoonErc721.setTokenUriMode(0)
+          await exomoonErc721.setPrerevealUri("https://example.com/hidden.json")
+        })
+
+        it("Should return prereveal token URI", async () => {
+          await exomoonErc721.mint(1, "0x", { value: ethers.parseEther("0.1") })
+          expect(await exomoonErc721.tokenURI(1)).to.be.equal("https://example.com/hidden.json")
+        })
+
+        it("Should revert if trying to read token URI of non-existing token", async () => {
+          expect(exomoonErc721.tokenURI(1)).to.be.reverted
+        })
       })
 
-      it("Should return revealed token URI with custom prefix and suffix", async () => {
-        await exomoonErc721.setBaseUri("https://example.com/")
-        await exomoonErc721.setUriSuffix(".json")
+      describe("Default mode (1)", () => {
+        it("Should return default revealed token URI", async () => {
+          await exomoonErc721.mint(1, "0x", { value: ethers.parseEther("0.1") })
+          expect(await exomoonErc721.tokenURI(1)).to.be.equal("1.json")
+        })
 
-        await exomoonErc721.mint(1, "0x", { value: ethers.parseEther("0.1") })
-        expect(await exomoonErc721.tokenURI(1)).to.be.equal("https://example.com/1.json")
+        it("Should return revealed token URI with custom prefix and suffix", async () => {
+          await exomoonErc721.setBaseUri("https://example.com/")
+          await exomoonErc721.setUriSuffix(".json")
 
-        await exomoonErc721.setBaseUri("https://api.example.com/")
-        await exomoonErc721.setUriSuffix("")
+          await exomoonErc721.mint(1, "0x", { value: ethers.parseEther("0.1") })
+          expect(await exomoonErc721.tokenURI(1)).to.be.equal("https://example.com/1.json")
 
-        expect(await exomoonErc721.tokenURI(1)).to.be.equal("https://api.example.com/1")
+          await exomoonErc721.setBaseUri("https://api.example.com/")
+          await exomoonErc721.setUriSuffix("")
+
+          expect(await exomoonErc721.tokenURI(1)).to.be.equal("https://api.example.com/1")
+        })
+
+        it("Should read base URI", async () => {
+          expect(await exomoonErc721.baseUri()).to.be.equal("")
+          await exomoonErc721.setBaseUri("https://example.com/")
+          expect(await exomoonErc721.baseUri()).to.be.equal("https://example.com/")
+        })
+
+        it("Should read URI suffix", async () => {
+          expect(await exomoonErc721.uriSuffix()).to.be.equal(".json")
+          await exomoonErc721.setUriSuffix("")
+          expect(await exomoonErc721.uriSuffix()).to.be.equal("")
+          await exomoonErc721.setUriSuffix(".custom-extension")
+          expect(await exomoonErc721.uriSuffix()).to.be.equal(".custom-extension")
+        })
+
+        it("Should revert if trying to read token URI of non-existing token", async () => {
+          expect(exomoonErc721.tokenURI(1)).to.be.reverted
+        })
+
+        it("Should revert if a non-owner tries to set base URI", async () => {
+          await expect(
+            exomoonErc721.connect(accounts[1]).setBaseUri("https://example.com/"),
+          ).to.be.revertedWithCustomError(exomoonErc721, "OwnableUnauthorizedAccount")
+        })
+
+        it("Should revert if a non-owner tries to set URI suffix", async () => {
+          await expect(exomoonErc721.connect(accounts[1]).setUriSuffix("")).to.be.revertedWithCustomError(
+            exomoonErc721,
+            "OwnableUnauthorizedAccount",
+          )
+        })
       })
 
-      it("Should read base URI", async () => {
-        expect(await exomoonErc721.baseUri()).to.be.equal("")
-        await exomoonErc721.setBaseUri("https://example.com/")
-        expect(await exomoonErc721.baseUri()).to.be.equal("https://example.com/")
-      })
+      describe("Mint Data mode (2)", () => {
+        beforeEach(async () => {
+          await exomoonErc721.setTokenUriMode(2)
+          await exomoonErc721.setBaseUri("https://example.com/")
+        })
 
-      it("Should read URI suffix", async () => {
-        expect(await exomoonErc721.uriSuffix()).to.be.equal(".json")
-        await exomoonErc721.setUriSuffix("")
-        expect(await exomoonErc721.uriSuffix()).to.be.equal("")
-        await exomoonErc721.setUriSuffix(".custom-extension")
-        expect(await exomoonErc721.uriSuffix()).to.be.equal(".custom-extension")
-      })
-
-      it("Should revert if trying to read token URI of non-existing token", async () => {
-        expect(exomoonErc721.tokenURI(1)).to.be.reverted
-      })
-
-      it("Should revert if a non-owner tries to set base URI", async () => {
-        await expect(
-          exomoonErc721.connect(accounts[1]).setBaseUri("https://example.com/"),
-        ).to.be.revertedWithCustomError(exomoonErc721, "OwnableUnauthorizedAccount")
-      })
-
-      it("Should revert if a non-owner tries to set URI suffix", async () => {
-        await expect(exomoonErc721.connect(accounts[1]).setUriSuffix("")).to.be.revertedWithCustomError(
-          exomoonErc721,
-          "OwnableUnauthorizedAccount",
-        )
+        it("Should return mint data token URI", async () => {
+          await exomoonErc721.mint(1, "0x", { value: ethers.parseEther("0.1") })
+          expect(await exomoonErc721.tokenURI(1)).to.be.equal("https://example.com/0x/1.json")
+        })
       })
     })
   })
