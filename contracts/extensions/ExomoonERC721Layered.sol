@@ -3,8 +3,6 @@ pragma solidity ^0.8.24;
 
 import {IExomoonERC721Layered} from "./IExomoonERC721Layered.sol";
 import {ExomoonERC721} from "../ExomoonERC721.sol";
-import {IERC721A} from "erc721a/contracts/IERC721A.sol";
-import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 /**
  * @title ExomoonERC721Layered Contract
