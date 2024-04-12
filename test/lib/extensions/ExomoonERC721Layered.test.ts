@@ -1,9 +1,9 @@
 import { Wallet } from "ethers"
 import { ethers } from "hardhat"
-import { ExomoonERC721FixedSupplyFixture } from "../shared/fixtures"
+import { ExomoonERC721FixedSupplyFixture } from "../../shared/fixtures"
 import { expect } from "chai"
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers"
-import { ExomoonERC721, ExomoonERC721Layered, IExomoonERC721Layered } from "../../typechain-types"
+import { ExomoonERC721, ExomoonERC721Layered, IExomoonERC721Layered } from "../../../typechain-types"
 
 export async function ExomoonERC721LayeredFixedSupplyFixture(): Promise<ExomoonERC721Layered> {
   const ExomoonERC721LayeredFactory = await ethers.getContractFactory("ExomoonERC721Layered")

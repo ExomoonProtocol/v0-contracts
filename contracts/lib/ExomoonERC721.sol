@@ -133,7 +133,7 @@ contract ExomoonERC721 is ERC721A, Ownable, IExomoonERC721 {
     /**
      * @inheritdoc IExomoonERC721
      */
-    function setPrice(uint256 _newPrice) external override onlyOwner {
+    function setPrice(uint256 _newPrice) public override onlyOwner {
         _price = _newPrice;
     }
 
