@@ -16,7 +16,15 @@ const baseDeploymentFixture = async () => {
   return instance
 }
 
-describe("ExomoonPathfinders", () => {
+const launchDeploymentFixture = async () => {
+  const instance = await ExomoonPathfindersFixedSupplyFixture()
+
+  await instance.setPaused(false)
+
+  return instance
+}
+
+describe.only("ExomoonPathfinders", () => {
   let exomoonPathfinders: ExomoonPathfinders
   let accounts: Wallet[]
 
@@ -30,5 +38,32 @@ describe("ExomoonPathfinders", () => {
 
   it("Should deploy", async () => {
     expect(await exomoonPathfinders.getAddress()).to.be.not.undefined
+  })
+
+  describe("inviterOf", () => {
+    beforeEach(async () => {
+      exomoonPathfinders = await loadFixture(launchDeploymentFixture)
+    })
+
+    it("Should return the inviter of an new address", async () => {
+      expect(await exomoonPathfinders.inviterOf(accounts[1].address)).to.be.equal(ethers.ZeroAddress)
+    })
+
+    it("Should return the inviter of an address that has been invited", async () => {
+      const data = await exomoonPathfinders.encodeLayersInfo([
+        {
+          layerIndex: 0,
+          variation: 1,
+          color: 0,
+        },
+      ])
+
+      await exomoonPathfinders
+        .connect(accounts[1])
+        .refMint(accounts[2].address, 1, data, { value: ethers.parseEther("0.15") })
+
+      expect(await exomoonPathfinders.inviterOf(accounts[1].address)).to.be.equal(accounts[2].address)
+      expect(await exomoonPathfinders.inviterOf(accounts[2].address)).to.be.equal(ethers.ZeroAddress)
+    })
   })
 })

@@ -17,10 +17,10 @@ contract ExomoonPathfinders is ExomoonERC721Layered {
 
     constructor() ExomoonERC721Layered("Exomoon Pathfinders", "PATH", 10000) {
         // General configuration
-        setPrice(0);
+        setPrice(0.1 ether);
 
         // Layers configuration
-        addLayer("Background", 0, 10, true);
+        addLayer("Background", 0.05 ether, 10, true);
     }
 
     /**
