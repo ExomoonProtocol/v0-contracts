@@ -5,7 +5,11 @@ import "@nomicfoundation/hardhat-chai-matchers"
 import "@nomicfoundation/hardhat-verify"
 import "hardhat-gas-reporter"
 import "solidity-docgen"
-import "hardhat-tracer"
+
+// Disable the hardhat-tracer plugin when running on ThirdWeb. This is because the two technologies are incompatible.
+if (!process.env.THIRDWEB_DEPLOY) {
+  require("hardhat-tracer")
+}
 
 import { config as dotEnvConfig } from "dotenv"
 dotEnvConfig()

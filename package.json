@@ -14,7 +14,8 @@
     "clean": "rm -rf artifacts/ cache/ typechain-types/ docs/",
     "clean-modules": "rm -rf node_modules/",
     "docs": "hardhat docgen",
-    "lint": "solhint -f table contracts/**/*.sol"
+    "lint": "solhint -f table contracts/**/*.sol",
+    "thirdweb-deploy": "cross-env THIRDWEB_DEPLOY=true npx thirdweb deploy"
   },
   "files": [
     "contracts",
