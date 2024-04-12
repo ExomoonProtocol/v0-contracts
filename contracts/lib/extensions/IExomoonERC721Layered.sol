@@ -29,12 +29,23 @@ interface IExomoonERC721Layered is IExomoonERC721 {
     error InvalidVariationIndex();
 
     /**
+     * @dev Error thrown when a required layer is missing.
+     */
+    error RequiredLayerMissing(uint256 layerIndex);
+
+    /**
+     * @dev Error thrown when the number of variations exceeds the limit.
+     */
+    error TooManyVariations();
+
+    /**
      * @dev This struct represents a layer of the NFT.
      */
     struct Layer {
         string name;
         uint256 price;
         uint8 variations;
+        bool required;
         mapping(uint8 => uint256) priceOverrides;
     }
 
@@ -52,8 +63,9 @@ interface IExomoonERC721Layered is IExomoonERC721 {
      * @param _name The name of the layer.
      * @param _price The price of the layer.
      * @param _variations The number of variations for the layer.
+     * @param required Whether the layer is required for the NFT.
      */
-    function addLayer(string memory _name, uint256 _price, uint8 _variations) external;
+    function addLayer(string memory _name, uint256 _price, uint8 _variations, bool required) external;
 
     /**
      * @dev This function sets the price of the layer at the specified index.
@@ -82,10 +94,20 @@ interface IExomoonERC721Layered is IExomoonERC721 {
      * @param _index The index of the layer.
      * @param _variation The index of the variation.
      */
-    function getVariationPrice(
-        uint256 _index,
-        uint8 _variation
-    ) external view returns (uint256);
+    function getVariationPrice(uint256 _index, uint8 _variation) external view returns (uint256);
+
+    /**
+     * @dev This function returns the prices of the layers.
+     * @return uint256[] The prices of the layers.
+     */
+    function getLayerPrices() external view returns (uint256[] memory);
+
+    /**
+     * @dev This function returns the prices of the variations of the layer at the specified index.
+     * @param _index The index of the layer.
+     * @return uint256[] The prices of the variations of the layer.
+     */
+    function getVariationPrices(uint256 _index) external view returns (uint256[] memory);
 
     /**
      * @dev This function returns the layer at the specified index.
@@ -106,16 +128,12 @@ interface IExomoonERC721Layered is IExomoonERC721 {
      * @param _tokenId The token ID.
      * @return TokenLayerInfo[] The list of layers associated with the token.
      */
-    function getTokenLayersInfo(
-        uint256 _tokenId
-    ) external view returns (TokenLayerInfo[] memory);
+    function getTokenLayersInfo(uint256 _tokenId) external view returns (TokenLayerInfo[] memory);
 
     /**
      * @dev This function encodes the layers information into bytes.
      * @param _layersInfo The list of layers information.
      * @return bytes The encoded layers information.
      */
-    function encodeLayersInfo(
-        TokenLayerInfo[] memory _layersInfo
-    ) external pure returns (bytes memory);
+    function encodeLayersInfo(TokenLayerInfo[] memory _layersInfo) external pure returns (bytes memory);
 }

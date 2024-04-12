@@ -19,8 +19,10 @@ contract ExomoonERC721 is ERC721A, Ownable, IExomoonERC721 {
     bool private _paused = true;
     uint256 private _price;
 
+    TokenUriMode internal _tokenUriMode = TokenUriMode.Default;
     string private _baseUri = "";
     string private _uriSuffix = ".json";
+    string private _prerevealUri = "";
 
     bytes4 private constant _INTERFACE_ID_EXOMOON_ERC721 = type(IExomoonERC721).interfaceId;
 
@@ -96,6 +98,34 @@ contract ExomoonERC721 is ERC721A, Ownable, IExomoonERC721 {
     /**
      * @inheritdoc IExomoonERC721
      */
+    function tokenUriMode() external view override returns (TokenUriMode) {
+        return _tokenUriMode;
+    }
+
+    /**
+     * @inheritdoc IExomoonERC721
+     */
+    function setTokenUriMode(TokenUriMode _mode) external override onlyOwner {
+        _tokenUriMode = _mode;
+    }
+
+    /**
+     * @inheritdoc IExomoonERC721
+     */
+    function prerevealUri() external view override returns (string memory) {
+        return _prerevealUri;
+    }
+
+    /**
+     * @inheritdoc IExomoonERC721
+     */
+    function setPrerevealUri(string memory _newPrerevealUri) external override onlyOwner {
+        _prerevealUri = _newPrerevealUri;
+    }
+
+    /**
+     * @inheritdoc IExomoonERC721
+     */
     function price() external view override returns (uint256) {
         return _price;
     }
@@ -160,11 +190,7 @@ contract ExomoonERC721 is ERC721A, Ownable, IExomoonERC721 {
     /**
      * Internal function that mints a specified amount of tokens for a specified address.
      */
-    function _mintForAddress(
-        address _to,
-        uint256 _amount,
-        bytes memory _data
-    ) internal virtual canMint(_amount) {
+    function _mintForAddress(address _to, uint256 _amount, bytes memory _data) internal virtual canMint(_amount) {
         _processTokenData(_amount, _data);
         _mint(_to, _amount);
     }
@@ -183,19 +209,14 @@ contract ExomoonERC721 is ERC721A, Ownable, IExomoonERC721 {
     /**
      * @inheritdoc IExomoonERC721
      */
-    function mint(
-        uint256 _amount,
-        bytes memory _data
-    ) external payable virtual override active enoughFunds(_amount) {
+    function mint(uint256 _amount, bytes memory _data) external payable virtual override active enoughFunds(_amount) {
         _mintForAddress(msg.sender, _amount, _data);
     }
 
     /**
      * @inheritdoc IExomoonERC721
      */
-    function getTokenData(
-        uint256 _tokenId
-    ) public view virtual override returns (bytes memory) {
+    function getTokenData(uint256 _tokenId) public view virtual override returns (bytes memory) {
         return _tokenData[_tokenId];
     }
 
@@ -208,10 +229,36 @@ contract ExomoonERC721 is ERC721A, Ownable, IExomoonERC721 {
         require(success);
     }
 
-    function tokenURI(
-        uint256 _tokenId
-    ) public view virtual override(ERC721A, IERC721A) returns (string memory) {
-        return string(abi.encodePacked(_baseUri, Strings.toString(_tokenId), _uriSuffix));
+    function tokenURI(uint256 _tokenId) public view virtual override(ERC721A, IERC721A) returns (string memory) {
+        if (_tokenUriMode == TokenUriMode.Prereveal) {
+            return _prerevealUri;
+        } else if (_tokenUriMode == TokenUriMode.Default) {
+            return string(abi.encodePacked(_baseUri, Strings.toString(_tokenId), _uriSuffix));
+        } else if (_tokenUriMode == TokenUriMode.MintData) {
+            return
+                string(
+                    abi.encodePacked(
+                        this.baseUri(),
+                        _bytesToHex(getTokenData(_tokenId)),
+                        "/",
+                        Strings.toString(_tokenId),
+                        this.uriSuffix()
+                    )
+                );
+        }
+        return "";
+    }
+
+    function _bytesToHex(bytes memory buffer) internal pure returns (string memory) {
+        bytes memory converted = new bytes(buffer.length * 2);
+        bytes memory _base = "0123456789abcdef";
+
+        for (uint256 i = 0; i < buffer.length; i++) {
+            converted[i * 2] = _base[uint8(buffer[i]) / _base.length];
+            converted[i * 2 + 1] = _base[uint8(buffer[i]) % _base.length];
+        }
+
+        return string(abi.encodePacked("0x", converted));
     }
 
     /**
@@ -219,12 +266,8 @@ contract ExomoonERC721 is ERC721A, Ownable, IExomoonERC721 {
      * @param interfaceId The id of the interface to check.
      * @return bool Whether the contract supports the interface or not.
      */
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view virtual override(ERC721A, IERC721A) returns (bool) {
-        return
-            interfaceId == _INTERFACE_ID_EXOMOON_ERC721 ||
-            super.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, IERC721A) returns (bool) {
+        return interfaceId == _INTERFACE_ID_EXOMOON_ERC721 || super.supportsInterface(interfaceId);
     }
 
     /**

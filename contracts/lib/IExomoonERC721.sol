@@ -9,6 +9,24 @@ import {IERC721A} from "erc721a/contracts/IERC721A.sol";
  */
 interface IExomoonERC721 is IERC721A {
     /**
+     * @dev Enum representing the different modes for the token URI.
+     */
+    enum TokenUriMode {
+        /**
+         * @dev Pre-reveal mode, where the token URI is set to a pre-reveal URI, without the token ID nor the extension and/or token data.
+         */
+        Prereveal,
+        /**
+         * @dev Default mode, where the token URI is set to the base URI, followed by the token ID and the extension.
+         */
+        Default,
+        /**
+         * @dev Mint data mode, where the token URI is set to the base URI, followed by the token ID, the extension, and the token data.
+         */
+        MintData
+    }
+
+    /**
      * @dev This error is thrown when the maximum supply of tokens is exceeded.
      */
     error MaxSupplyExceeded();
@@ -44,6 +62,30 @@ interface IExomoonERC721 is IERC721A {
      * @param _paused The new paused state of the contract.
      */
     function setPaused(bool _paused) external;
+
+    /**
+     * @dev This function returns the token URI mode.
+     * @return TokenUriMode The token URI mode.
+     */
+    function tokenUriMode() external view returns (TokenUriMode);
+
+    /**
+     * @dev This function sets the token URI mode.
+     * @param _mode The new token URI mode.
+     */
+    function setTokenUriMode(TokenUriMode _mode) external;
+
+    /**
+     * @dev This function returns the pre-reveal URI.
+     * @return string The pre-reveal URI.
+     */
+    function prerevealUri() external view returns (string memory);
+
+    /**
+     * @dev This function sets the pre-reveal URI.
+     * @param _newPrerevealUri The new pre-reveal URI.
+     */
+    function setPrerevealUri(string memory _newPrerevealUri) external;
 
     /**
      * @dev Gets the price of the token.
