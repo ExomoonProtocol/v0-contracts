@@ -525,7 +525,7 @@ describe("ExomoonERC721Layered", () => {
         ])
 
         await expect(
-          exomoonErc721Layered.mint(1, data, { value: ethers.parseEther("1.0999") }),
+          exomoonErc721Layered.connect(accounts[1]).mint(1, data, { value: ethers.parseEther("1.0999") }),
         ).to.be.revertedWithCustomError(exomoonErc721Layered, "InsufficientFunds")
       })
 
@@ -551,7 +551,7 @@ describe("ExomoonERC721Layered", () => {
         ])
 
         await expect(
-          exomoonErc721Layered.mint(1, data, { value: ethers.parseEther("1.499") }),
+          exomoonErc721Layered.connect(accounts[1]).mint(1, data, { value: ethers.parseEther("1.499") }),
         ).to.be.revertedWithCustomError(exomoonErc721Layered, "InsufficientFunds")
       })
 

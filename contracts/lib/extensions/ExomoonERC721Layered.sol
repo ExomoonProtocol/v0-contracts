@@ -209,8 +209,6 @@ contract ExomoonERC721Layered is ExomoonERC721, IExomoonERC721Layered {
         }
 
         // Checks if the total price is enough
-        if (msg.value < totalPrice) {
-            revert InsufficientFunds();
-        }
+        _checkFunds(totalPrice);
     }
 }
