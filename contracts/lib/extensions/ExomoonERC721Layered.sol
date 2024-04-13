@@ -41,7 +41,7 @@ contract ExomoonERC721Layered is ExomoonERC721, IExomoonERC721Layered {
         uint256 _price,
         uint8 _variations,
         bool _required
-    ) external override onlyOwner {
+    ) public override onlyOwner {
         if (_variations >= 32) {
             revert TooManyVariations();
         }
@@ -57,7 +57,7 @@ contract ExomoonERC721Layered is ExomoonERC721, IExomoonERC721Layered {
     /**
      * @inheritdoc IExomoonERC721Layered
      */
-    function setLayerPrice(uint256 _index, uint256 _price) external override isLayerValid(_index) onlyOwner {
+    function setLayerPrice(uint256 _index, uint256 _price) public override isLayerValid(_index) onlyOwner {
         _layers[_index].price = _price;
     }
 
@@ -68,7 +68,7 @@ contract ExomoonERC721Layered is ExomoonERC721, IExomoonERC721Layered {
         uint256 _index,
         uint8 _variation,
         uint256 _price
-    ) external override isLayerValid(_index) onlyOwner {
+    ) public override isLayerValid(_index) onlyOwner {
         if (_variation >= _layers[_index].variations) {
             revert InvalidVariationIndex();
         }
@@ -209,8 +209,6 @@ contract ExomoonERC721Layered is ExomoonERC721, IExomoonERC721Layered {
         }
 
         // Checks if the total price is enough
-        if (msg.value < totalPrice) {
-            revert InsufficientFunds();
-        }
+        _checkFunds(totalPrice);
     }
 }

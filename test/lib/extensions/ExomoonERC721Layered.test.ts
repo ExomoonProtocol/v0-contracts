@@ -1,9 +1,9 @@
 import { Wallet } from "ethers"
 import { ethers } from "hardhat"
-import { ExomoonERC721FixedSupplyFixture } from "../shared/fixtures"
+import { ExomoonERC721FixedSupplyFixture } from "../../shared/fixtures"
 import { expect } from "chai"
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers"
-import { ExomoonERC721, ExomoonERC721Layered, IExomoonERC721Layered } from "../../typechain-types"
+import { ExomoonERC721, ExomoonERC721Layered, IExomoonERC721Layered } from "../../../typechain-types"
 
 export async function ExomoonERC721LayeredFixedSupplyFixture(): Promise<ExomoonERC721Layered> {
   const ExomoonERC721LayeredFactory = await ethers.getContractFactory("ExomoonERC721Layered")
@@ -525,7 +525,7 @@ describe("ExomoonERC721Layered", () => {
         ])
 
         await expect(
-          exomoonErc721Layered.mint(1, data, { value: ethers.parseEther("1.0999") }),
+          exomoonErc721Layered.connect(accounts[1]).mint(1, data, { value: ethers.parseEther("1.0999") }),
         ).to.be.revertedWithCustomError(exomoonErc721Layered, "InsufficientFunds")
       })
 
@@ -551,7 +551,7 @@ describe("ExomoonERC721Layered", () => {
         ])
 
         await expect(
-          exomoonErc721Layered.mint(1, data, { value: ethers.parseEther("1.499") }),
+          exomoonErc721Layered.connect(accounts[1]).mint(1, data, { value: ethers.parseEther("1.499") }),
         ).to.be.revertedWithCustomError(exomoonErc721Layered, "InsufficientFunds")
       })
 

@@ -63,6 +63,15 @@ contract ExomoonERC721 is ERC721A, Ownable, IExomoonERC721 {
         _;
     }
 
+    function _checkFunds(uint256 _minimumFunds) internal view {
+        // Checks funds. If owner is the caller, no need to check funds.
+        if (msg.sender != owner()) {
+            if (msg.value < _minimumFunds) {
+                revert InsufficientFunds();
+            }
+        }
+    }
+
     /**
      * @dev Modifier that checks if the caller has sent enough funds to execute the function.
      * @param _amount The amount of funds required.
@@ -133,7 +142,7 @@ contract ExomoonERC721 is ERC721A, Ownable, IExomoonERC721 {
     /**
      * @inheritdoc IExomoonERC721
      */
-    function setPrice(uint256 _newPrice) external override onlyOwner {
+    function setPrice(uint256 _newPrice) public override onlyOwner {
         _price = _newPrice;
     }
 
@@ -189,6 +198,9 @@ contract ExomoonERC721 is ERC721A, Ownable, IExomoonERC721 {
 
     /**
      * Internal function that mints a specified amount of tokens for a specified address.
+     * @param _to The address to mint the tokens for.
+     * @param _amount The amount of tokens to mint.
+     * @param _data Additional data to pass to the mint
      */
     function _mintForAddress(address _to, uint256 _amount, bytes memory _data) internal virtual canMint(_amount) {
         _processTokenData(_amount, _data);

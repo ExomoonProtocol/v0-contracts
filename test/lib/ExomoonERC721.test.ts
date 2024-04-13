@@ -1,9 +1,9 @@
 import { Wallet } from "ethers"
 import { ethers } from "hardhat"
-import { ExomoonERC721FixedSupplyFixture } from "./shared/fixtures"
+import { ExomoonERC721FixedSupplyFixture } from "../shared/fixtures"
 import { expect } from "chai"
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers"
-import { ExomoonERC721 } from "../typechain-types"
+import { ExomoonERC721 } from "../../typechain-types"
 
 const baseDeploymentFixture = async () => {
   const instance = await ExomoonERC721FixedSupplyFixture()

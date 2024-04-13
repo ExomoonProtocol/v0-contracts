@@ -1,6 +1,6 @@
 {
   "name": "@exomoon/v0-contracts",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "repository": "https://github.com/ExomoonProtocol/v0-contracts.git",
   "license": "MIT",
   "publishConfig": {
@@ -15,7 +15,8 @@
     "clean-modules": "rm -rf node_modules/",
     "docs": "hardhat docgen",
     "lint": "solhint -f table contracts/**/*.sol",
-    "thirdweb-deploy": "cross-env THIRDWEB_DEPLOY=true npx thirdweb deploy"
+    "thirdweb-deploy": "cross-env THIRDWEB_DEPLOY=true npx thirdweb deploy",
+    "publish-package": "yarn clean && yarn compile && yarn publish"
   },
   "files": [
     "contracts",
