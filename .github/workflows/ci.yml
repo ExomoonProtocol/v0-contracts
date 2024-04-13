@@ -146,7 +146,7 @@ jobs:
 
       # Zip content of docs folder
       - name: Zip Documentation
-        run: zip -r exomoon-v0-contracts-documentation-${{ steps.extract_branch.outputs.branch }}.zip docs
+        run: zip -r ${{ steps.extract_branch.outputs.branch }}.zip docs
 
       - uses: hkusu/s3-upload-action@v2
         id: upload
@@ -155,4 +155,5 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: "us-east-1"
           aws-bucket: ${{ secrets.AWS_BUCKET }}
-          file-path: exomoon-v0-contracts-documentation-${{ steps.extract_branch.outputs.branch }}.zip
+          file-path: ${{ steps.extract_branch.outputs.branch }}.zip
+          destination-dir: /v0-contracts
