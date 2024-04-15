@@ -16,7 +16,9 @@
     "docs": "hardhat docgen",
     "lint": "solhint -f table contracts/**/*.sol",
     "thirdweb-deploy": "cross-env THIRDWEB_DEPLOY=true npx thirdweb deploy",
-    "publish-package": "yarn clean && yarn compile && yarn publish"
+    "publish-package": "yarn clean && yarn compile && yarn publish",
+    "verify-testnet": "hardhat verify --constructor-args arguments.js --network testnet",
+    "verify-mainnet": "hardhat verify --constructor-args arguments.js --network mainnet"
   },
   "files": [
     "contracts",
