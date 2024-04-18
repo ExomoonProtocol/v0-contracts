@@ -21,9 +21,14 @@ contract ExomoonPathfinders is ExomoonERC721Layered {
 
         // Layers configuration
         addLayer("Background", 0, 4, true);
+        addLayer("Planet", 0, 6, true);
+        addLayer("Earth", 0, 1, true);
         addLayer("Backpack", 0.02 ether, 3, false);
-        setLayerVariationPrice(1, 2, 0.001 ether);
+        setLayerVariationPrice(3, 2, 0.001 ether);
+        addLayer("Body", 0, 2, true);
+        addLayer("Face", 0, 1, true);
         addLayer("Suit", 0, 3, false);
+        addLayer("Helmet", 0, 1, true);
         addLayer("Pipe", 0, 1, false);
     }
 
