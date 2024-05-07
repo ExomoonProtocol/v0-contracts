@@ -16,6 +16,14 @@ dotEnvConfig()
 
 export default {
   networks: {
+    testnet: {
+      url: process.env.TESTNET_URL,
+      accounts: [process.env.TESTNET_ACCOUNT],
+    },
+    mainnet: {
+      url: process.env.MAINNET_URL,
+      accounts: [process.env.MAINNET_ACCOUNT],
+    },
     hardhat: {
       allowUnlimitedContractSize: false,
     },

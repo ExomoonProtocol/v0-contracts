@@ -138,8 +138,16 @@ jobs:
         run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
         id: extract_branch
 
-      - name: Archive Documentation
-        uses: actions/upload-artifact@v4
+      - name: Zip Documentation
+        run: cd docs && zip -r ../${{ steps.extract_branch.outputs.branch }}.zip .
+
+      - uses: hkusu/s3-upload-action@v2
+        id: upload
         with:
-          name: exomoon-v0-contracts-documentation-${{ steps.extract_branch.outputs.branch }}
-          path: ./docs
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: "us-east-1"
+          aws-bucket: ${{ secrets.AWS_BUCKET }}
+          file-path: ${{ steps.extract_branch.outputs.branch }}.zip
+          destination-dir: /v0-contracts
+          bucket-root: /
