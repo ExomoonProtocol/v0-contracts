@@ -100,7 +100,7 @@ contract ExomoonERC721 is ERC721A, Ownable, IExomoonERC721 {
     /**
      * @inheritdoc IExomoonERC721
      */
-    function setPaused(bool _pausedVal) external override onlyOwner {
+    function setPaused(bool _pausedVal) public override onlyOwner {
         _paused = _pausedVal;
     }
 

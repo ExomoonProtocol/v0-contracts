@@ -24,7 +24,7 @@ const launchDeploymentFixture = async () => {
   return instance
 }
 
-describe.only("ExomoonPathfinders", () => {
+describe("ExomoonPathfinders", () => {
   let exomoonPathfinders: ExomoonPathfinders
   let accounts: Wallet[]
 
@@ -50,10 +50,62 @@ describe.only("ExomoonPathfinders", () => {
     })
 
     it("Should return the inviter of an address that has been invited", async () => {
+      /* layers:
+        addLayer("Background", 0, 4, true);
+        addLayer("Planet", 0, 6, false);
+        addLayer("Earth", 0, 1, true);
+        addLayer("Backpack", 0.02 ether, 3, true);
+        setLayerVariationPrice(3, 2, 0.001 ether);
+        addLayer("Body", 0, 2, true);
+        addLayer("Suit", 0, 3, true);
+        addLayer("Face", 0, 4, true);
+        addLayer("Helmet", 0, 1, true);
+        addLayer("Pipe", 0, 1, true);
+        */
       const data = await exomoonPathfinders.encodeLayersInfo([
         {
           layerIndex: 0,
-          variation: 1,
+          variation: 0,
+          color: 0,
+        },
+        {
+          layerIndex: 1,
+          variation: 0,
+          color: 0,
+        },
+        {
+          layerIndex: 2,
+          variation: 0,
+          color: 0,
+        },
+        {
+          layerIndex: 3,
+          variation: 0,
+          color: 0,
+        },
+        {
+          layerIndex: 4,
+          variation: 0,
+          color: 0,
+        },
+        {
+          layerIndex: 5,
+          variation: 0,
+          color: 0,
+        },
+        {
+          layerIndex: 6,
+          variation: 0,
+          color: 0,
+        },
+        {
+          layerIndex: 7,
+          variation: 0,
+          color: 0,
+        },
+        {
+          layerIndex: 8,
+          variation: 0,
           color: 0,
         },
       ])
